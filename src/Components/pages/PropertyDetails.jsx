@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import bed from '../../assets/img/bed.png';
 import bath from '../../assets/img/bath.png';
@@ -21,10 +21,15 @@ function PropertyDetails() {
   const [selectedBhk, setSelectedBhk] = useState('4 BHK');
   const [currentPage, setCurrentPage] = useState(1);
   const [showEnquiry, setShowEnquiry] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpTimer, setOtpTimer] = useState(29);
+  const otpRefs = useRef([]);
   const totalPages = 8;
 
   useEffect(() => {
-    if (showEnquiry) {
+    if (showEnquiry || showOtp || showSuccess) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -32,7 +37,44 @@ function PropertyDetails() {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showEnquiry]);
+  }, [showEnquiry, showOtp, showSuccess]);
+
+  useEffect(() => {
+    if (showOtp && otpTimer > 0) {
+      const interval = setInterval(() => {
+        setOtpTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showOtp, otpTimer]);
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleSendOtp = () => {
+    setShowEnquiry(false);
+    setShowOtp(true);
+    setOtpTimer(29);
+    setOtp(['', '', '', '', '', '']);
+  };
+
+  const handleVerifySubmit = () => {
+    setShowOtp(false);
+    setShowSuccess(true);
+  };
 
   const property = {
     name: 'Skyline Residency - 3BHK',
@@ -566,13 +608,83 @@ function PropertyDetails() {
                   rows={2}
                   className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-400 placeholder-gray-400 resize-none"
                 />
-                <button className="w-full py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors cursor-pointer">
+                <button onClick={handleSendOtp} className="w-full py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-colors cursor-pointer">
                   Send OTP
                 </button>
                 <p className="text-xs text-gray-500 text-center">
                   By enquiring you accept our <span className="text-gray-700 font-medium">Terms of use</span> & <span className="text-gray-700 font-medium">Privacy Policy</span>
                 </p>
               </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* OTP Verification Modal */}
+      {showOtp && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowOtp(false)}>
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">Verify your phone number</h3>
+                <button onClick={() => setShowOtp(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">&times;</button>
+              </div>
+              <hr className="border-gray-200 mb-5" />
+              <p className="text-sm text-gray-600 text-center mb-5">
+                We've sent a 6 - digit OTP to <span className="font-semibold text-gray-900">+91 XXXXXXX1721</span>
+              </p>
+              <div className="flex justify-center gap-3 mb-5">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (otpRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    className="w-11 h-12 text-center text-lg font-semibold text-gray-700 border border-gray-300 rounded-lg outline-none focus:border-blue-500"
+                  />
+                ))}
+              </div>
+              <p className="text-sm text-center mb-5">
+                <span className="text-blue-600 font-semibold cursor-pointer">Resend OTP</span>{' '}
+                <span className="text-gray-500">in {otpTimer}s</span>
+              </p>
+              <button onClick={handleVerifySubmit} className="w-full py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors cursor-pointer">
+                Verify & Submit enquiry
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowSuccess(false)}>
+            <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl p-8 text-center" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-end mb-2">
+                <button onClick={() => setShowSuccess(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">&times;</button>
+              </div>
+              <div className="flex justify-center mb-5">
+                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Enquiry Submitted successfully</h3>
+              <p className="text-sm text-gray-500 mb-4">Our team or the seller will contact you shortly.</p>
+              <p className="text-sm text-gray-500 mb-6">
+                Reference ID: <span className="text-blue-600 font-semibold">PNP-23941</span>
+              </p>
+              <button onClick={() => setShowSuccess(false)} className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                Continue Browsing
+              </button>
             </div>
           </div>
         </>
