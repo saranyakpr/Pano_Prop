@@ -1,38 +1,14 @@
+import logo from '../../assets/img/logo.png';
+
 function Footer() {
   return (
     <footer className="bg-black text-gray-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 sm:pt-16 sm:pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 sm:pt-16 sm:pb-10">
         {/* Footer Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-8 mb-10 sm:mb-14">
           {/* Brand */}
           <div>
-            <a href="/" className="flex items-center gap-2 mb-4">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 2L28 9V23L16 30L4 23V9L16 2Z"
-                  fill="#3B82F6"
-                  opacity="0.2"
-                />
-                <path
-                  d="M16 6L24 11V21L16 26L8 21V11L16 6Z"
-                  fill="#3B82F6"
-                  opacity="0.4"
-                />
-                <path
-                  d="M16 10L20 13V19L16 22L12 19V13L16 10Z"
-                  fill="#3B82F6"
-                />
-              </svg>
-              <span className="text-lg font-bold text-white tracking-wider">
-                PANO PROP
-              </span>
-            </a>
+            {/* <img src={logo} alt="PANO PROP Logo" className="h-10 w-auto mb-4" /> */}
             <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
               The most trusted real estate marketplace for finding your perfect home with verified listings and seamless simplicity.
             </p>
